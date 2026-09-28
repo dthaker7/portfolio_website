@@ -54,13 +54,23 @@ document.querySelectorAll('#sk .rv').forEach(e=>io.observe(e));
 const secs=['experience','work','skills','contact'].map(id=>$('#'+id));
 new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)document.querySelectorAll('nav ul a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id))}),{rootMargin:'-45% 0px -50% 0px'}).observe&&secs.forEach(s=>new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)document.querySelectorAll('nav ul a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id))}),{rootMargin:'-45% 0px -50% 0px'}).observe(s));
 
-// experience carousel
-const tr=$('#tr'),cn=$('#cn'),pv=$('#pv'),nx=$('#nx'),cards=tr.children;
-const stp=()=>cards[0].offsetWidth+18;
-function upd(){const max=tr.scrollWidth-tr.clientWidth-2;pv.disabled=tr.scrollLeft<=2;nx.disabled=tr.scrollLeft>=max;
-cn.textContent=Math.min(cards.length,Math.round(tr.scrollLeft/stp())+1)+' / '+cards.length}
-pv.onclick=()=>tr.scrollBy({left:-stp(),behavior:'smooth'});
-nx.onclick=()=>tr.scrollBy({left:stp(),behavior:'smooth'});
-tr.addEventListener('scroll',upd,{passive:true});addEventListener('resize',upd);
-tr.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx.click();if(e.key==='ArrowLeft')pv.click()});
-upd();
+// parallax photo
+addEventListener('pointermove',e=>{const p=$('#ph');if(!p||RM)return;p.style.setProperty('--px',((e.clientX/innerWidth-.5)*-16)+'px');p.style.setProperty('--py',((e.clientY/innerHeight-.5)*-16)+'px')});
+// work slider
+const E=[
+['2026–present · Business Strategy Research Analyst','UIUC Gies College of Business','Interactive lessons and analytical tools built with faculty. Python models, Jupyter notebooks, and browser experiences let students test assumptions.',[['16','lab experiments'],['50+','controls']],['Python','Jupyter','ipywidgets','Faculty collaboration']],
+['Feb–May 2025 · Business Operations & Analytics','Zenith Precision','An Excel dashboard tracking requests by industry, division, status, outcome, and turnaround time, so the team could scan sales at a glance.',[['204','RFQs'],['1,300+','part records']],['Excel','PivotTables','Slicers','KPI reporting']],
+['2025–2026 · CRM & Prospect Engagement','UIUC Enrollment Operations','Follow-up adapted to each student\u2019s interest, decision stage, and urgency: prioritize, personalize, follow up.',[['4','channels'],['100+','students']],['CRM','Segmentation','Prioritization','Follow-up']],
+['2025–2026 · Growth Consulting Projects','Lodgic + Lazers\u2019 Edge','Studied how customers find, compare, and choose for two local businesses: competitor benchmarks, search demand, website paths, channel advice.',[['2','businesses'],['10','keywords']],['Competitor benchmarks','Search demand','Website paths','Channel advice']],
+['Python · Flask · Machine Learning','MatchOracle','A football match prediction system using team strength, recent form, league strength, home advantage and goal-based modeling.',[],['Team strength','Recent form','League strength','Home advantage','Goal-based modeling']]];
+const tr=$('#tr'),dt=$('#dots'),vp=$('.viewport');let cur=0;
+tr.innerHTML=E.map((e,i)=>`<article class="slide" aria-label="${i+1} of ${E.length}"><span class="st">${e[0]}</span><h3>${e[1]}</h3><p>${e[2]}</p><div class="more">${e[3].length?`<div class="kp">${e[3].map(k=>`<span><b>${k[0]}</b>${k[1]}</span>`).join('')}</div>`:''}<div class="chips">${e[4].map(c=>`<span class="chip">${c}</span>`).join('')}</div></div><button class="lm" aria-expanded="false">Learn more</button></article>`).join('');
+dt.innerHTML=E.map((e,i)=>`<button aria-label="Go to ${e[1]}"></button>`).join('');
+function go(i){cur=(i+E.length)%E.length;tr.style.transform=`translateX(${-cur*100}%)`;[...tr.children].forEach((s,k)=>s.inert=k!==cur);[...dt.children].forEach((d,k)=>d.classList.toggle('on',k===cur))}
+tr.querySelectorAll('.lm').forEach(b=>b.onclick=()=>{const s=b.parentElement,o=s.classList.toggle('open');b.textContent=o?'Show less':'Learn more';b.setAttribute('aria-expanded',o)});
+[...dt.children].forEach((d,k)=>d.onclick=()=>go(k));
+$('#pv').onclick=()=>go(cur-1);$('#nx').onclick=()=>go(cur+1);
+let sx=null;vp.addEventListener('pointerdown',e=>sx=e.clientX);
+vp.addEventListener('pointerup',e=>{if(sx===null)return;const d=e.clientX-sx;sx=null;if(Math.abs(d)>50)go(cur+(d<0?1:-1))});
+$('.slider').addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
+go(0);
