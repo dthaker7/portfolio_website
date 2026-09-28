@@ -53,3 +53,14 @@ document.querySelectorAll('#sk .rv').forEach(e=>io.observe(e));
 // nav highlight
 const secs=['experience','work','skills','contact'].map(id=>$('#'+id));
 new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)document.querySelectorAll('nav ul a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id))}),{rootMargin:'-45% 0px -50% 0px'}).observe&&secs.forEach(s=>new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)document.querySelectorAll('nav ul a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id))}),{rootMargin:'-45% 0px -50% 0px'}).observe(s));
+
+// experience carousel
+const tr=$('#tr'),cn=$('#cn'),pv=$('#pv'),nx=$('#nx'),cards=tr.children;
+const stp=()=>cards[0].offsetWidth+18;
+function upd(){const max=tr.scrollWidth-tr.clientWidth-2;pv.disabled=tr.scrollLeft<=2;nx.disabled=tr.scrollLeft>=max;
+cn.textContent=Math.min(cards.length,Math.round(tr.scrollLeft/stp())+1)+' / '+cards.length}
+pv.onclick=()=>tr.scrollBy({left:-stp(),behavior:'smooth'});
+nx.onclick=()=>tr.scrollBy({left:stp(),behavior:'smooth'});
+tr.addEventListener('scroll',upd,{passive:true});addEventListener('resize',upd);
+tr.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx.click();if(e.key==='ArrowLeft')pv.click()});
+upd();
